@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import db
 import uuid
-from flask import session, redirect, url_for
+
+app = Flask(__name__)
 app.secret_key = "Alexandray26"
 
 db.init_db()
@@ -10,21 +11,6 @@ db.init_db()
 def home():
     return render_template("index.html")
 
-@app.route("/admin")
-def admin():
-    if not session.get("admin"):
-        return redirect("/login")
-
-    bookings = db.get_bookings()
-    return render_template("admin.html", bookings=bookings)
-
-@app.route("/delete/<bid>")
-def delete(bid):
-    if not session.get("admin"):
-        return redirect("/login")
-
-    db.delete_booking(bid)
-    return redirect("/admin")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -40,9 +26,37 @@ def login():
 
     return render_template("login.html")
 
+
+@app.route("/admin")
+def admin():
+    if not session.get("admin"):
+        return redirect("/login")
+
+    bookings = db.get_bookings()
+    return render_template("admin.html", bookings=bookings)
+
+
+@app.route("/delete/<bid>")
+def delete(bid):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    db.delete_booking(bid)
+    return redirect("/admin")
+
+
+@app.route("/logout")
+def logout():
+    session.pop("admin", None)
+    return redirect("/login")
+
+
 @app.route("/available")
 def available():
     date = request.args.get("date")
+
+    if not date:
+        return jsonify([])
 
     booked = db.get_booked_times(date)
 
@@ -89,10 +103,6 @@ def book():
         print("ERROR:", e)
         return "Server error", 500
 
-@app.route("/logout")
-def logout():
-    session.pop("admin", None)
-    return redirect("/login")
 
 if __name__ == "__main__":
     app.run()
