@@ -64,26 +64,28 @@
 
     <h1>Book Appointment</h1>
 
-    <form method="POST" action="/book">
+<form method="POST" action="/book">
 
-        <input name="name" placeholder="Your Name" required>
+    <input name="name" placeholder="Your Name" required><br><br>
 
-        <input name="email" placeholder="Your Email" required>
+    <input name="email" placeholder="Your Email" required><br><br>
 
-        <input type="date" name="date" required>
+    <input type="date" name="date" required><br><br>
 
-        <select name="time" required>
-            <option>10:00 AM</option>
-            <option>11:00 AM</option>
-            <option>12:00 PM</option>
-            <option>2:00 PM</option>
-            <option>3:00 PM</option>
-            <option>4:00 PM</option>
-        </select>
+    <select name="time">
+        <option value="10:00 AM">10:00 AM</option>
+        <option value="11:00 AM">11:00 AM</option>
+        <option value="12:00 PM">12:00 PM</option>
+        <option value="2:00 PM">2:00 PM</option>
+        <option value="3:00 PM">3:00 PM</option>
+        <option value="4:00 PM">4:00 PM</option>
+    </select>
 
-        <button type="submit">Book Now</button>
+    <br><br>
 
-    </form>
+    <button type="submit">Book Now</button>
+
+</form>
 
 </div>
 

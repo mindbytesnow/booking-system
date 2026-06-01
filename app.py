@@ -1,5 +1,5 @@
 from emailer import send_confirmation, notify_admin
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect
 import db
 import uuid
 from datetime import datetime
@@ -9,75 +9,53 @@ app.secret_key = "Alexandray26"
 
 db.init_db()
 
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route("/analytics")
-def analytics():
-    if not session.get("admin"):
-        return redirect("/login")
 
-    bookings = db.get_bookings()
+@app.route("/book", methods=["POST"])
+def book():
+    try:
+        name = request.form.get("name")
+        email = request.form.get("email")
+        date = request.form.get("date")
+        time = request.form.get("time")
 
-    total = len(bookings)
+        # 🔥 DEBUG (this will show in terminal)
+        print("🔥 BOOK REQUEST RECEIVED")
+        print(name, email, date, time)
 
-    today = datetime.now().strftime("%Y-%m-%d")
-    today_bookings = [b for b in bookings if b["date"] == today]
+        # ❌ BASIC VALIDATION (prevents "nothing happens")
+        if not name or not email or not date or not time:
+            return "Missing fields ❌", 400
 
-    unique_customers = len(set([b["email"] for b in bookings]))
+        data = {
+            "id": str(uuid.uuid4()),
+            "name": name,
+            "email": email,
+            "service": "General",
+            "date": date,
+            "time": time,
+            "status": "confirmed"
+        }
 
-    # simple grouping by date
-    stats = {}
-    for b in bookings:
-        d = b["date"]
-        stats[d] = stats.get(d, 0) + 1
+        db.add_booking(data)
 
-    return render_template(
-        "analytics.html",
-        total=total,
-        today=len(today_bookings),
-        unique=unique_customers,
-        stats=stats
-    )
+        # 📧 Emails (safe execution)
+        try:
+            send_confirmation(email, name, date, time)
+            notify_admin(name, email, date, time)
+            print("📧 EMAILS SENT")
+        except Exception as mail_error:
+            print("EMAIL ERROR:", mail_error)
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        return "Booking confirmed ✅"
 
-        if username == "admin" and password == "1234":
-            session["admin"] = True
-            return redirect("/admin")
-
-        return "Invalid login"
-
-    return render_template("login.html")
-
-
-@app.route("/admin")
-def admin():
-    if not session.get("admin"):
-        return redirect("/login")
-
-    bookings = db.get_bookings()
-    return render_template("admin.html", bookings=bookings)
-
-
-@app.route("/delete/<bid>")
-def delete(bid):
-    if not session.get("admin"):
-        return redirect("/login")
-
-    db.delete_booking(bid)
-    return redirect("/admin")
-
-
-@app.route("/logout")
-def logout():
-    session.pop("admin", None)
-    return redirect("/login")
+    except Exception as e:
+        print("❌ BOOKING ERROR:", e)
+        return f"Server error: {str(e)}", 500
 
 
 @app.route("/available")
@@ -103,49 +81,72 @@ def available():
     return jsonify(free_slots)
 
 
-@app.route("/book", methods=["POST"])
-def book():
-    try:
-        name = request.form.get("name")
-        email = request.form.get("email")
-        date = request.form.get("date")
-        time = request.form.get("time")
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-        data = {
-            "id": str(uuid.uuid4()),
-            "name": name,
-            "email": email,
-            "service": "General",
-            "date": date,
-            "time": time,
-            "status": "confirmed"
-        }
+        if username == "admin" and password == "1234":
+            session["admin"] = True
+            return redirect("/admin")
 
-        db.add_booking(data)
+        return "Invalid login"
 
-        send_confirmation(
-            email,
-            name,
-            date,
-            time
-        )
+    return render_template("login.html")
 
-        notify_admin(
-            name,
-            email,
-            date,
-            time
-        )
 
-        return "Booking confirmed ✅"
+@app.route("/admin")
+def admin():
+    if not session.get("admin"):
+        return redirect("/login")
 
-    except Exception as e:
-        if "UNIQUE constraint failed" in str(e):
-            return "❌ This slot is already booked", 409
+    bookings = db.get_bookings()
+    return render_template("admin.html", bookings=bookings)
 
-        print("ERROR:", e)
-        return "Server error", 500
+
+@app.route("/analytics")
+def analytics():
+    if not session.get("admin"):
+        return redirect("/login")
+
+    bookings = db.get_bookings()
+
+    total = len(bookings)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    today_bookings = [b for b in bookings if b["date"] == today]
+
+    unique_customers = len(set([b["email"] for b in bookings]))
+
+    stats = {}
+    for b in bookings:
+        d = b["date"]
+        stats[d] = stats.get(d, 0) + 1
+
+    return render_template(
+        "analytics.html",
+        total=total,
+        today=len(today_bookings),
+        unique=unique_customers,
+        stats=stats
+    )
+
+
+@app.route("/delete/<bid>")
+def delete(bid):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    db.delete_booking(bid)
+    return redirect("/admin")
+
+
+@app.route("/logout")
+def logout():
+    session.pop("admin", None)
+    return redirect("/login")
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
