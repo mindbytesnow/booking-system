@@ -18,15 +18,14 @@ def book():
         email = request.form.get("email")
         time = request.form.get("time")
 
-        if not name or not email or not time:
-            return "Missing fields", 400
+        date = "2026-01-01"  # temporary (we can upgrade to real calendar later)
 
         data = {
             "id": str(uuid.uuid4()),
             "name": name,
             "email": email,
             "service": "General",
-            "date": "2026-01-01",
+            "date": date,
             "time": time,
             "status": "confirmed"
         }
@@ -36,6 +35,10 @@ def book():
         return "Booking confirmed ✅"
 
     except Exception as e:
+        # THIS catches double booking error
+        if "UNIQUE constraint failed" in str(e):
+            return "❌ This time slot is already booked", 409
+
         print("ERROR:", e)
         return "Server error", 500
 
