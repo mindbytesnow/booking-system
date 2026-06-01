@@ -1,4 +1,4 @@
-from emailer import send_confirmation
+from emailer import send_confirmation, notify_admin
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import db
 import uuid
@@ -129,6 +129,14 @@ def book():
             date,
             time
         )
+
+        notify_admin(
+            name,
+            email,
+            date,
+            time
+        )
+
         return "Booking confirmed ✅"
 
     except Exception as e:
