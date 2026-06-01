@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+            margin: 0;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .number {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .small {
+            color: gray;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>📊 Analytics Dashboard</h2>
+    <a href="/admin">← Back</a>
+</div>
+
+<div class="container">
+
+    <div class="grid">
+
+        <div class="card">
+            <div class="number">{{ total }}</div>
+            <div class="small">Total Bookings</div>
+        </div>
+
+        <div class="card">
+            <div class="number">{{ today }}</div>
+            <div class="small">Today</div>
+        </div>
+
+        <div class="card">
+            <div class="number">{{ unique }}</div>
+            <div class="small">Unique Customers</div>
+        </div>
+
+    </div>
+
+    <h3 style="margin-top:30px;">Bookings per Day</h3>
+
+    {% for date, count in stats.items() %}
+        <div class="card">
+            <b>{{ date }}</b> — {{ count }} bookings
+        </div>
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

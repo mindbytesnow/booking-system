@@ -2,24 +2,27 @@
 <html>
 <head>
     <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
         }
 
-        .header {
+        .topbar {
             background: #111827;
             color: white;
-            padding: 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .container {
+            max-width: 900px;
+            margin: auto;
             padding: 20px;
         }
 
@@ -27,71 +30,81 @@
             background: white;
             padding: 15px;
             margin-bottom: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
         .row {
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .meta {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
         }
 
         .btn {
             background: #ef4444;
             color: white;
             padding: 8px 12px;
+            border-radius: 8px;
             text-decoration: none;
-            border-radius: 6px;
+            font-size: 14px;
         }
 
         .btn:hover {
             background: #dc2626;
         }
 
-        .meta {
-            color: #555;
-            font-size: 14px;
-            margin-top: 5px;
+        .stats {
+            margin-bottom: 20px;
+            font-size: 18px;
         }
 
-        .logout {
-            background: #374151;
-            padding: 8px 12px;
-            border-radius: 6px;
+        a.link {
             color: white;
             text-decoration: none;
+            margin-left: 15px;
         }
     </style>
 </head>
 
 <body>
 
-<div class="header">
-    <h2>📊 Admin Dashboard</h2>
-    <a class="logout" href="/logout">Logout</a>
+<div class="topbar">
+    <div>📊 Admin Dashboard</div>
+    <div>
+        <a class="link" href="/analytics">Analytics</a>
+        <a class="link" href="/logout">Logout</a>
+    </div>
 </div>
 
 <div class="container">
 
-    <h3>Total Bookings: {{ bookings|length }}</h3>
+    <div class="stats">
+        Total Bookings: {{ bookings|length }}
+    </div>
 
     {% for b in bookings %}
     <div class="card">
-
         <div class="row">
             <div>
-                <h3>{{ b.name }}</h3>
+                <div class="name">{{ b.name }}</div>
                 <div class="meta">📧 {{ b.email }}</div>
                 <div class="meta">📅 {{ b.date }} at {{ b.time }}</div>
                 <div class="meta">Status: {{ b.status }}</div>
             </div>
 
-            <div>
-                <a class="btn" href="/delete/{{ b.id }}">Delete</a>
-            </div>
+            <a class="btn" href="/delete/{{ b.id }}">Delete</a>
         </div>
-
     </div>
     {% endfor %}
 

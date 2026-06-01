@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import db
 import uuid
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "Alexandray26"
@@ -11,6 +12,33 @@ db.init_db()
 def home():
     return render_template("index.html")
 
+@app.route("/analytics")
+def analytics():
+    if not session.get("admin"):
+        return redirect("/login")
+
+    bookings = db.get_bookings()
+
+    total = len(bookings)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    today_bookings = [b for b in bookings if b["date"] == today]
+
+    unique_customers = len(set([b["email"] for b in bookings]))
+
+    # simple grouping by date
+    stats = {}
+    for b in bookings:
+        d = b["date"]
+        stats[d] = stats.get(d, 0) + 1
+
+    return render_template(
+        "analytics.html",
+        total=total,
+        today=len(today_bookings),
+        unique=unique_customers,
+        stats=stats
+    )
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
