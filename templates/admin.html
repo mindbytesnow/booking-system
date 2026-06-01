@@ -1,0 +1,16 @@
+<h1>Admin Dashboard</h1>
+
+<a href="/logout">Logout</a>
+
+<hr>
+
+{% for b in bookings %}
+    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <p><b>Name:</b> {{ b.name }}</p>
+        <p><b>Email:</b> {{ b.email }}</p>
+        <p><b>Date:</b> {{ b.date }}</p>
+        <p><b>Time:</b> {{ b.time }}</p>
+
+        <a href="/delete/{{ b.id }}">Delete</a>
+    </div>
+{% endfor %}

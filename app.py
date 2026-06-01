@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import db
 import uuid
-
-app = Flask(__name__)
+from flask import session, redirect, url_for
+app.secret_key = "Alexandray26"
 
 db.init_db()
 
@@ -10,6 +10,35 @@ db.init_db()
 def home():
     return render_template("index.html")
 
+@app.route("/admin")
+def admin():
+    if not session.get("admin"):
+        return redirect("/login")
+
+    bookings = db.get_bookings()
+    return render_template("admin.html", bookings=bookings)
+
+@app.route("/delete/<bid>")
+def delete(bid):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    db.delete_booking(bid)
+    return redirect("/admin")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if username == "admin" and password == "1234":
+            session["admin"] = True
+            return redirect("/admin")
+
+        return "Invalid login"
+
+    return render_template("login.html")
 
 @app.route("/available")
 def available():
@@ -60,6 +89,10 @@ def book():
         print("ERROR:", e)
         return "Server error", 500
 
+@app.route("/logout")
+def logout():
+    session.pop("admin", None)
+    return redirect("/login")
 
 if __name__ == "__main__":
     app.run()
