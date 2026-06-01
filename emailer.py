@@ -2,7 +2,17 @@ import smtplib
 from email.mime.text import MIMEText
 
 EMAIL = "mindbytesnow@gmail.com"
-PASSWORD = "dzip yqiw xjva wfeg"
+PASSWORD = "dzipyqiwxjvawfeg"
+
+
+def send_email(msg):
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(EMAIL, PASSWORD)
+            server.send_message(msg)
+    except Exception as e:
+        print("EMAIL ERROR:", e)
+
 
 def send_confirmation(to_email, name, date, time):
 
@@ -22,27 +32,23 @@ Thank you.
     msg["From"] = EMAIL
     msg["To"] = to_email
 
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-    server.login(EMAIL, PASSWORD)
-    server.send_message(msg)
-    server.quit()
+    send_email(msg)
+
+
 def notify_admin(name, email, date, time):
 
-    msg = MIMEText(f"""
+    body = f"""
 New Booking Received
 
 Name: {name}
 Email: {email}
 Date: {date}
 Time: {time}
-""")
+"""
 
+    msg = MIMEText(body)
     msg["Subject"] = "New Booking Alert 🚀"
     msg["From"] = EMAIL
+    msg["To"] = EMAIL
 
-    # Your email address
-    msg["To"] = "mindbytesnow@gmail.com"
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(EMAIL, PASSWORD)
-        server.send_message(msg)
+    send_email(msg)
