@@ -23,13 +23,18 @@ def book():
         date = request.form.get("date")
         time = request.form.get("time")
 
-        # 🔥 DEBUG (this will show in terminal)
         print("🔥 BOOK REQUEST RECEIVED")
         print(name, email, date, time)
 
-        # ❌ BASIC VALIDATION (prevents "nothing happens")
+        # ✅ VALIDATION
         if not name or not email or not date or not time:
             return "Missing fields ❌", 400
+
+        # 🚫 DOUBLE BOOKING CHECK (FIX)
+        booked_times = db.get_booked_times(date)
+
+        if time in booked_times:
+            return "❌ This slot is already booked. Please choose another time.", 409
 
         data = {
             "id": str(uuid.uuid4()),
@@ -43,7 +48,7 @@ def book():
 
         db.add_booking(data)
 
-        # 📧 Emails (safe execution)
+        # 📧 EMAIL SYSTEM (safe)
         try:
             send_confirmation(email, name, date, time)
             notify_admin(name, email, date, time)
