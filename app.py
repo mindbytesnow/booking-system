@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import db
+import uuid
 
 app = Flask(__name__)
 
@@ -9,16 +10,34 @@ db.init_db()
 def home():
     return render_template("index.html")
 
+
+@app.route("/available")
+def available():
+    date = request.args.get("date")
+
+    booked = db.get_booked_times(date)
+
+    all_slots = [
+        "10:00 AM",
+        "11:00 AM",
+        "12:00 PM",
+        "2:00 PM",
+        "3:00 PM",
+        "4:00 PM"
+    ]
+
+    free_slots = [t for t in all_slots if t not in booked]
+
+    return jsonify(free_slots)
+
+
 @app.route("/book", methods=["POST"])
 def book():
     try:
-        import uuid
-
         name = request.form.get("name")
         email = request.form.get("email")
+        date = request.form.get("date")
         time = request.form.get("time")
-
-        date = "2026-01-01"  # temporary (we can upgrade to real calendar later)
 
         data = {
             "id": str(uuid.uuid4()),
@@ -35,12 +54,12 @@ def book():
         return "Booking confirmed ✅"
 
     except Exception as e:
-        # THIS catches double booking error
         if "UNIQUE constraint failed" in str(e):
-            return "❌ This time slot is already booked", 409
+            return "❌ This slot is already booked", 409
 
         print("ERROR:", e)
         return "Server error", 500
+
 
 if __name__ == "__main__":
     app.run()
