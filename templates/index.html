@@ -16,7 +16,7 @@
             background: white;
             padding: 25px;
             border-radius: 12px;
-            width: 400px;
+            width: 420px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
@@ -24,7 +24,7 @@
             text-align: center;
         }
 
-        input, select {
+        input {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
@@ -32,6 +32,33 @@
             border-radius: 8px;
         }
 
+        /* 📅 CALENDAR */
+        #calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .day {
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .day:hover {
+            background: #ddd;
+        }
+
+        .day.selected {
+            background: black;
+            color: white;
+        }
+
+        /* ⏰ SLOTS */
         .slots {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -66,6 +93,12 @@
         .msg {
             text-align: center;
             margin-top: 10px;
+            color: gray;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
         }
     </style>
 </head>
@@ -81,9 +114,12 @@
         <input name="name" placeholder="Your Name" required>
         <input name="email" placeholder="Your Email" required>
 
-        <input type="date" name="date" id="date" required>
+        <label>Select Date</label>
+        <div id="calendar"></div>
 
-        <div class="slots" id="slots">
+        <input type="hidden" name="date" id="date" required>
+
+        <div class="slots">
             <button type="button" class="slot">10:00 AM</button>
             <button type="button" class="slot">11:00 AM</button>
             <button type="button" class="slot">12:00 PM</button>
@@ -92,7 +128,7 @@
             <button type="button" class="slot">4:00 PM</button>
         </div>
 
-        <input type="hidden" name="time" id="selectedTime">
+        <input type="hidden" name="time" id="selectedTime" required>
 
         <button type="submit">Book Now</button>
 
@@ -101,12 +137,83 @@
 </div>
 
 <script>
+const calendar = document.getElementById("calendar");
+const dateInput = document.getElementById("date");
 const slots = document.querySelectorAll(".slot");
 const selectedTime = document.getElementById("selectedTime");
 const msg = document.getElementById("msg");
 
+let selectedDate = null;
+
+/* 📅 BUILD MONTH CALENDAR */
+function generateCalendar() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    calendar.innerHTML = "";
+
+    // empty spaces before month starts
+    for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        calendar.appendChild(empty);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const div = document.createElement("div");
+        div.className = "day";
+        div.innerText = day;
+
+        div.addEventListener("click", () => {
+
+            document.querySelectorAll(".day").forEach(d => d.classList.remove("selected"));
+            div.classList.add("selected");
+
+            selectedDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+            dateInput.value = selectedDate;
+
+            loadAvailability(selectedDate);
+        });
+
+        calendar.appendChild(div);
+    }
+}
+
+/* 🔥 RESET SLOTS */
+function resetSlots() {
+    slots.forEach(slot => {
+        slot.disabled = false;
+        slot.classList.remove("active");
+        slot.style.opacity = "1";
+    });
+}
+
+/* 📡 GET AVAILABLE SLOTS FROM BACKEND */
+async function loadAvailability(date) {
+    if (!date) return;
+
+    const res = await fetch(`/available?date=${date}`);
+    const data = await res.json();
+
+    resetSlots();
+
+    slots.forEach(slot => {
+        if (data.includes(slot.innerText)) {
+            slot.disabled = true;
+            slot.style.opacity = "0.3";
+        }
+    });
+}
+
+/* ⏰ SLOT CLICK */
 slots.forEach(slot => {
     slot.addEventListener("click", () => {
+
+        if (slot.disabled) return;
 
         slots.forEach(s => s.classList.remove("active"));
 
@@ -114,9 +221,12 @@ slots.forEach(slot => {
 
         selectedTime.value = slot.innerText;
 
-        msg.innerText = "Selected: " + slot.innerText;
+        msg.innerText = "Selected: " + selectedDate + " at " + slot.innerText;
     });
 });
+
+/* INIT */
+generateCalendar();
 </script>
 
 </body>
