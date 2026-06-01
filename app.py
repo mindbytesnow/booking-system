@@ -11,13 +11,23 @@ def home():
 
 @app.route("/book", methods=["POST"])
 def book():
-    name = request.form["name"]
-    email = request.form["email"]
-    time = request.form["time"]
+    try:
+        data = {
+            "id": str(uuid.uuid4()),
+            "name": request.form.get("name", ""),
+            "email": request.form.get("email", ""),
+            "service": "General",
+            "date": "2026-01-01",
+            "time": request.form.get("time", ""),
+            "status": "confirmed"
+        }
 
-    db.add_booking(name, email, time)
+        db.add_booking(data)
 
-    return "Booking confirmed ✅"
+        return "Booking confirmed ✅"
 
+    except Exception as e:
+        print("ERROR:", e)
+        return "Server error", 500
 if __name__ == "__main__":
     app.run()
