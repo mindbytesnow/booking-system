@@ -96,7 +96,7 @@ def login():
             session["admin"] = True
             return redirect("/admin")
 
-        return "Invalid login"
+            return render_template("login.html", error="Invalid username or password")
 
     return render_template("login.html")
 
