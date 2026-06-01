@@ -1,3 +1,4 @@
+from emailer import send_confirmation
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import db
 import uuid
@@ -122,6 +123,12 @@ def book():
 
         db.add_booking(data)
 
+        send_confirmation(
+            email,
+            name,
+            date,
+            time
+        )
         return "Booking confirmed ✅"
 
     except Exception as e:

@@ -1,26 +1,28 @@
 import smtplib
 from email.mime.text import MIMEText
 
-def send_email(data):
+EMAIL = "mindbytesnow@gmail.com"
+PASSWORD = "dzip yqiw xjva wfeg"
 
-    sender = "YOUR_EMAIL@gmail.com"
-    password = "YOUR_APP_PASSWORD"
+def send_confirmation(to_email, name, date, time):
 
-    msg = MIMEText(f"""
-Booking Confirmed
+    body = f"""
+Hi {name},
 
-Name: {data['name']}
-Service: {data['service']}
-Date: {data['date']}
-Time: {data['time']}
-""")
+Your booking has been confirmed.
 
+Date: {date}
+Time: {time}
+
+Thank you.
+"""
+
+    msg = MIMEText(body)
     msg["Subject"] = "Booking Confirmation"
-    msg["From"] = sender
-    msg["To"] = data["email"]
+    msg["From"] = EMAIL
+    msg["To"] = to_email
 
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login(sender, password)
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+    server.login(EMAIL, PASSWORD)
     server.send_message(msg)
     server.quit()
