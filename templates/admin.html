@@ -1,16 +1,101 @@
-<h1>Admin Dashboard</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
 
-<a href="/logout">Logout</a>
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-<hr>
+        .container {
+            padding: 20px;
+        }
 
-{% for b in bookings %}
-    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <p><b>Name:</b> {{ b.name }}</p>
-        <p><b>Email:</b> {{ b.email }}</p>
-        <p><b>Date:</b> {{ b.date }}</p>
-        <p><b>Time:</b> {{ b.time }}</p>
+        .card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
 
-        <a href="/delete/{{ b.id }}">Delete</a>
+        .row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #ef4444;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background: #dc2626;
+        }
+
+        .meta {
+            color: #555;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .logout {
+            background: #374151;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>📊 Admin Dashboard</h2>
+    <a class="logout" href="/logout">Logout</a>
+</div>
+
+<div class="container">
+
+    <h3>Total Bookings: {{ bookings|length }}</h3>
+
+    {% for b in bookings %}
+    <div class="card">
+
+        <div class="row">
+            <div>
+                <h3>{{ b.name }}</h3>
+                <div class="meta">📧 {{ b.email }}</div>
+                <div class="meta">📅 {{ b.date }} at {{ b.time }}</div>
+                <div class="meta">Status: {{ b.status }}</div>
+            </div>
+
+            <div>
+                <a class="btn" href="/delete/{{ b.id }}">Delete</a>
+            </div>
+        </div>
+
     </div>
-{% endfor %}
+    {% endfor %}
+
+</div>
+
+</body>
+</html>
